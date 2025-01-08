@@ -11,11 +11,17 @@ document.addEventListener("DOMContentLoaded", () => {
         row.querySelector(".calories").textContent = calories;
 
         const totalCalories = calories || 1; // Avoid division by zero
-        const proteinPercentage = (protein * 4 / totalCalories * 100).toFixed(0);
-        const fatPercentage = (fat * 9 / totalCalories * 100).toFixed(0);
-        const carbPercentage = (carbs * 4 / totalCalories * 100).toFixed(0);
+        const proteinPercentage = (protein * 4 / totalCalories);
+        const fatPercentage = (fat * 9 / totalCalories);
+        const carbPercentage = (carbs * 4 / totalCalories);
 
-        row.querySelector(".pfc-ratio").textContent = `${proteinPercentage}:${fatPercentage}:${carbPercentage}`;
+        // Convert ratios to whole numbers
+        const scaleFactor = 100 / (proteinPercentage + fatPercentage + carbPercentage);
+        const proteinRatio = Math.round(proteinPercentage * scaleFactor);
+        const fatRatio = Math.round(fatPercentage * scaleFactor);
+        const carbRatio = Math.round(carbPercentage * scaleFactor);
+
+        row.querySelector(".pfc-ratio").textContent = `${proteinRatio}:${fatRatio}:${carbRatio}`;
     }
 
     function calculateTotals() {
@@ -35,11 +41,17 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("total-calories").textContent = totalCalories;
 
         const totalCaloriesOverall = totalCalories || 1; // Avoid division by zero
-        const totalProteinPercentage = (totalProtein * 4 / totalCaloriesOverall * 100).toFixed(0);
-        const totalFatPercentage = (totalFat * 9 / totalCaloriesOverall * 100).toFixed(0);
-        const totalCarbPercentage = (totalCarbs * 4 / totalCaloriesOverall * 100).toFixed(0);
+        const totalProteinPercentage = (totalProtein * 4 / totalCaloriesOverall);
+        const totalFatPercentage = (totalFat * 9 / totalCaloriesOverall);
+        const totalCarbPercentage = (totalCarbs * 4 / totalCaloriesOverall);
 
-        document.getElementById("total-pfc").textContent = `${totalProteinPercentage}:${totalFatPercentage}:${totalCarbPercentage}`;
+        // Convert totals to whole number ratios
+        const scaleFactor = 100 / (totalProteinPercentage + totalFatPercentage + totalCarbPercentage);
+        const totalProteinRatio = Math.round(totalProteinPercentage * scaleFactor);
+        const totalFatRatio = Math.round(totalFatPercentage * scaleFactor);
+        const totalCarbRatio = Math.round(totalCarbPercentage * scaleFactor);
+
+        document.getElementById("total-pfc").textContent = `${totalProteinRatio}:${totalFatRatio}:${totalCarbRatio}`;
     }
 
     function addRow() {
