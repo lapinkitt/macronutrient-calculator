@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Macronutrient Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Macronutrient Calculator</h1>
+    <table id="calculator">
+        <thead>
+            <tr>
+                <th>Food Name</th>
+                <th>Protein (g)</th>
+                <th>Fat (g)</th>
+                <th>Carbs (g)</th>
+                <th>Calories (kcal)</th>
+                <th>PFC Ratio</th>
+            </tr>
+        </thead>
+        <tbody id="data-rows">
+            <tr>
+                <td><input type="text" placeholder="Food Name"></td>
+                <td><input type="number" class="protein" value="0"></td>
+                <td><input type="number" class="fat" value="0"></td>
+                <td><input type="number" class="carbs" value="0"></td>
+                <td class="calories">0</td>
+                <td class="pfc-ratio">0:0:0</td>
+            </tr>
+        </tbody>
+    </table>
+    <button id="add-row">Add Row</button>
+    <div id="totals">
+        <h2>Meal Totals</h2>
+        <p>Protein: <span id="total-protein">0</span> g</p>
+        <p>Fat: <span id="total-fat">0</span> g</p>
+        <p>Carbs: <span id="total-carbs">0</span> g</p>
+        <p>Calories: <span id="total-calories">0</span> kcal</p>
+        <p>PFC Ratio: <span id="total-pfc">0:0:0</span></p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
