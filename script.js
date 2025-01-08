@@ -11,11 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
         row.querySelector(".calories").textContent = calories;
 
         const totalCalories = calories || 1; // Avoid division by zero
-        const proteinPercentage = (protein * 4 / totalCalories * 100).toFixed(1);
-        const fatPercentage = (fat * 9 / totalCalories * 100).toFixed(1);
-        const carbPercentage = (carbs * 4 / totalCalories * 100).toFixed(1);
+        const proteinPercentage = (protein * 4 / totalCalories * 100).toFixed(0);
+        const fatPercentage = (fat * 9 / totalCalories * 100).toFixed(0);
+        const carbPercentage = (carbs * 4 / totalCalories * 100).toFixed(0);
 
-        row.querySelector(".pfc-ratio").textContent = `${proteinPercentage}% : ${fatPercentage}% : ${carbPercentage}%`;
+        row.querySelector(".pfc-ratio").textContent = `${proteinPercentage}:${fatPercentage}:${carbPercentage}`;
     }
 
     function calculateTotals() {
@@ -35,11 +35,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("total-calories").textContent = totalCalories;
 
         const totalCaloriesOverall = totalCalories || 1; // Avoid division by zero
-        const totalProteinPercentage = (totalProtein * 4 / totalCaloriesOverall * 100).toFixed(1);
-        const totalFatPercentage = (totalFat * 9 / totalCaloriesOverall * 100).toFixed(1);
-        const totalCarbPercentage = (totalCarbs * 4 / totalCaloriesOverall * 100).toFixed(1);
+        const totalProteinPercentage = (totalProtein * 4 / totalCaloriesOverall * 100).toFixed(0);
+        const totalFatPercentage = (totalFat * 9 / totalCaloriesOverall * 100).toFixed(0);
+        const totalCarbPercentage = (totalCarbs * 4 / totalCaloriesOverall * 100).toFixed(0);
 
-        document.getElementById("total-pfc").textContent = `${totalProteinPercentage}% : ${totalFatPercentage}% : ${totalCarbPercentage}%`;
+        document.getElementById("total-pfc").textContent = `${totalProteinPercentage}:${totalFatPercentage}:${totalCarbPercentage}`;
     }
 
     function addRow() {
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td><input type="number" class="fat" value="0"></td>
             <td><input type="number" class="carbs" value="0"></td>
             <td class="calories">0</td>
-            <td class="pfc-ratio">0% : 0% : 0%</td>
+            <td class="pfc-ratio">0:0:0</td>
         `;
         dataRows.appendChild(newRow);
         attachListeners(newRow);
