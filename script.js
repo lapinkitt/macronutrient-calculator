@@ -1,38 +1,70 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const addRowButton = document.getElementById("add-row");
-    const dataRows = document.getElementById("data-rows");
-    const historyList = document.getElementById("history-list");
+    const searchButton = document.getElementById("search-button");
+    const searchResults = document.getElementById("search-results");
 
-    // Load history from local storage
-    function loadHistory() {
-        const history = JSON.parse(localStorage.getItem("macronutrientHistory")) || [];
-        historyList.innerHTML = ""; // Clear current list
-        history.forEach(item => {
-            const historyItem = document.createElement("div");
-            historyItem.classList.add("history-item");
-            historyItem.textContent = `${item.food} - Protein: ${item.protein}g, Fat: ${item.fat}g, Carbs: ${item.carbs}g`;
-            historyItem.addEventListener("click", () => {
-                const newRow = createRow(item.food, item.protein, item.fat, item.carbs);
-                dataRows.appendChild(newRow);
+    const API_KEY = "t5DR6pfosAuanVoc8eQtWvREhp6lpf4q17PNKZHs"; // Replace with your actual API key
+
+    searchButton.addEventListener("click", () => {
+        const query = document.getElementById("food-search").value;
+        if (query.trim() === "") {
+            alert("Please enter a food name.");
+            return;
+        }
+
+        // Call the USDA API
+        fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${query}&api_key=${API_KEY}`)
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data.foods);
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+                alert("Failed to fetch data. Please try again.");
+            });
+    });
+
+    function displayResults(foods) {
+        searchResults.innerHTML = ""; // Clear previous results
+        if (foods.length === 0) {
+            searchResults.innerHTML = "<p>No results found.</p>";
+            return;
+        }
+
+        foods.forEach(food => {
+            const foodItem = document.createElement("div");
+            foodItem.classList.add("search-result-item");
+            foodItem.innerHTML = `
+                <strong>${food.description}</strong><br>
+                <p>Protein: ${food.foodNutrients.find(n => n.nutrientName === "Protein").value || 0} g</p>
+                <p>Fat: ${food.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)").value || 0} g</p>
+                <p>Carbs: ${food.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference").value || 0} g</p>
+                <button class="add-to-table" data-food='${JSON.stringify(food)}'>Add to Table</button>
+            `;
+            searchResults.appendChild(foodItem);
+        });
+
+        attachAddToTableButtons();
+    }
+
+    function attachAddToTableButtons() {
+        document.querySelectorAll(".add-to-table").forEach(button => {
+            button.addEventListener("click", (event) => {
+                const food = JSON.parse(event.target.getAttribute("data-food"));
+                const protein = food.foodNutrients.find(n => n.nutrientName === "Protein")?.value || 0;
+                const fat = food.foodNutrients.find(n => n.nutrientName === "Total lipid (fat)")?.value || 0;
+                const carbs = food.foodNutrients.find(n => n.nutrientName === "Carbohydrate, by difference")?.value || 0;
+
+                const newRow = createRow(food.description, protein, fat, carbs);
+                document.getElementById("data-rows").appendChild(newRow);
                 calculateRow(newRow);
             });
-            historyList.appendChild(historyItem);
         });
     }
 
-    // Save current data to local storage
-    function saveToHistory(food, protein, fat, carbs) {
-        const history = JSON.parse(localStorage.getItem("macronutrientHistory")) || [];
-        history.push({ food, protein, fat, carbs });
-        localStorage.setItem("macronutrientHistory", JSON.stringify(history));
-        loadHistory();
-    }
-
-    // Create a new row
     function createRow(food = "", protein = 0, fat = 0, carbs = 0) {
         const newRow = document.createElement("tr");
         newRow.innerHTML = `
-            <td><input type="text" value="${food}" placeholder="Food Name"></td>
+            <td><input type="text" value="${food}" readonly></td>
             <td><input type="number" class="protein" value="${protein}"></td>
             <td><input type="number" class="fat" value="${fat}"></td>
             <td><input type="number" class="carbs" value="${carbs}"></td>
@@ -41,6 +73,14 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         attachListeners(newRow);
         return newRow;
+    }
+
+    function attachListeners(row) {
+        row.querySelectorAll("input").forEach(input => {
+            input.addEventListener("input", () => {
+                calculateRow(row);
+            });
+        });
     }
 
     function calculateRow(row) {
@@ -63,29 +103,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
         row.querySelector(".pfc-ratio").textContent = `${proteinRatio}:${fatRatio}:${carbRatio}`;
     }
-
-    function attachListeners(row) {
-        row.querySelectorAll("input").forEach(input => {
-            input.addEventListener("input", () => {
-                calculateRow(row);
-                saveRowData(row);
-            });
-        });
-    }
-
-    function saveRowData(row) {
-        const food = row.querySelector("input[type='text']").value || "";
-        const protein = parseFloat(row.querySelector(".protein").value) || 0;
-        const fat = parseFloat(row.querySelector(".fat").value) || 0;
-        const carbs = parseFloat(row.querySelector(".carbs").value) || 0;
-        saveToHistory(food, protein, fat, carbs);
-    }
-
-    addRowButton.addEventListener("click", () => {
-        const newRow = createRow();
-        dataRows.appendChild(newRow);
-    });
-
-    // Load history on page load
-    loadHistory();
 });
