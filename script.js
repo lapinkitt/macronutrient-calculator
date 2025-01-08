@@ -1,39 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
     const addRowButton = document.getElementById("add-row");
     const dataRows = document.getElementById("data-rows");
-    const historySection = document.getElementById("history");
+    const historyList = document.getElementById("history-list");
 
     // Load history from local storage
     function loadHistory() {
         const history = JSON.parse(localStorage.getItem("macronutrientHistory")) || [];
+        historyList.innerHTML = ""; // Clear current list
         history.forEach(item => {
-            const newRow = createRow(item.food, item.protein, item.fat, item.carbs);
-            dataRows.appendChild(newRow);
-            calculateRow(newRow);
+            const historyItem = document.createElement("div");
+            historyItem.classList.add("history-item");
+            historyItem.textContent = `${item.food} - Protein: ${item.protein}g, Fat: ${item.fat}g, Carbs: ${item.carbs}g`;
+            historyItem.addEventListener("click", () => {
+                const newRow = createRow(item.food, item.protein, item.fat, item.carbs);
+                dataRows.appendChild(newRow);
+                calculateRow(newRow);
+            });
+            historyList.appendChild(historyItem);
         });
     }
 
     // Save current data to local storage
-    function saveToHistory() {
-        const rows = document.querySelectorAll("#data-rows tr");
-        const history = [];
-        rows.forEach(row => {
-            const food = row.querySelector("input[type='text']").value || "";
-            const protein = parseFloat(row.querySelector(".protein").value) || 0;
-            const fat = parseFloat(row.querySelector(".fat").value) || 0;
-            const carbs = parseFloat(row.querySelector(".carbs").value) || 0;
-            history.push({ food, protein, fat, carbs });
-        });
+    function saveToHistory(food, protein, fat, carbs) {
+        const history = JSON.parse(localStorage.getItem("macronutrientHistory")) || [];
+        history.push({ food, protein, fat, carbs });
         localStorage.setItem("macronutrientHistory", JSON.stringify(history));
-    }
-
-    // Clear history
-    function clearHistory() {
-        localStorage.removeItem("macronutrientHistory");
-        while (dataRows.firstChild) {
-            dataRows.removeChild(dataRows.firstChild);
-        }
-        updateTotals();
+        loadHistory();
     }
 
     // Create a new row
@@ -72,54 +64,28 @@ document.addEventListener("DOMContentLoaded", () => {
         row.querySelector(".pfc-ratio").textContent = `${proteinRatio}:${fatRatio}:${carbRatio}`;
     }
 
-    function updateTotals() {
-        const rows = document.querySelectorAll("#data-rows tr");
-        let totalProtein = 0, totalFat = 0, totalCarbs = 0, totalCalories = 0;
-
-        rows.forEach(row => {
-            totalProtein += parseFloat(row.querySelector(".protein").value) || 0;
-            totalFat += parseFloat(row.querySelector(".fat").value) || 0;
-            totalCarbs += parseFloat(row.querySelector(".carbs").value) || 0;
-            totalCalories += parseFloat(row.querySelector(".calories").textContent) || 0;
-        });
-
-        document.getElementById("total-protein").textContent = totalProtein;
-        document.getElementById("total-fat").textContent = totalFat;
-        document.getElementById("total-carbs").textContent = totalCarbs;
-        document.getElementById("total-calories").textContent = totalCalories;
-
-        const totalCaloriesOverall = totalCalories || 1; // Avoid division by zero
-        const totalProteinPercentage = (totalProtein * 4 / totalCaloriesOverall);
-        const totalFatPercentage = (totalFat * 9 / totalCaloriesOverall);
-        const totalCarbPercentage = (totalCarbs * 4 / totalCaloriesOverall);
-
-        const scaleFactor = 100 / (totalProteinPercentage + totalFatPercentage + totalCarbPercentage);
-        const totalProteinRatio = Math.round(totalProteinPercentage * scaleFactor);
-        const totalFatRatio = Math.round(totalFatPercentage * scaleFactor);
-        const totalCarbRatio = Math.round(totalCarbPercentage * scaleFactor);
-
-        document.getElementById("total-pfc").textContent = `${totalProteinRatio}:${totalFatRatio}:${totalCarbRatio}`;
-    }
-
     function attachListeners(row) {
         row.querySelectorAll("input").forEach(input => {
             input.addEventListener("input", () => {
                 calculateRow(row);
-                updateTotals();
-                saveToHistory();
+                saveRowData(row);
             });
         });
+    }
+
+    function saveRowData(row) {
+        const food = row.querySelector("input[type='text']").value || "";
+        const protein = parseFloat(row.querySelector(".protein").value) || 0;
+        const fat = parseFloat(row.querySelector(".fat").value) || 0;
+        const carbs = parseFloat(row.querySelector(".carbs").value) || 0;
+        saveToHistory(food, protein, fat, carbs);
     }
 
     addRowButton.addEventListener("click", () => {
         const newRow = createRow();
         dataRows.appendChild(newRow);
-        saveToHistory();
     });
-
-    document.getElementById("clear-history").addEventListener("click", clearHistory);
 
     // Load history on page load
     loadHistory();
-    updateTotals();
 });
